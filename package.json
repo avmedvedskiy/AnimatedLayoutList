@@ -1,0 +1,11 @@
+{
+  "name": "com.avmedvedskiy.animatedlayoutlist",
+  "displayName": "Animated Layout List",
+  "version": "0.1.0",
+  "unity": "2020.3",
+  "author": "avmedvedskiy",
+  "description": "Animated Layout List",
+  "keywords": [
+    "layout"
+  ]
+}
