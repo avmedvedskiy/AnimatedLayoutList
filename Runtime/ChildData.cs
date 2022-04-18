@@ -9,6 +9,7 @@ namespace AnimatedLayoutList
     {
         public RectTransform transform;
         public ILayoutIgnorer ignorer;
+        public IAnimatedLayoutElement animatedElement;
         public Vector2 position;
         public Vector2 size;
         public bool isNew;
