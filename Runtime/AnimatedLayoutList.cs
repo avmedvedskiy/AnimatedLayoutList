@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -12,18 +11,18 @@ namespace AnimatedLayoutList
     {
         public float minWidth => _minSize.x;
         public float preferredWidth => _preferredSize.x;
-        public float flexibleWidth { get; }
+        public float flexibleWidth => 0;
         public float minHeight => _minSize.y;
         public float preferredHeight => _preferredSize.y;
-        public float flexibleHeight { get; }
-        public int layoutPriority { get; }
+        public float flexibleHeight => 0;
+        public int layoutPriority => 0;
         
         [SerializeField] private Vector4 _padding;
         [SerializeField] private float _spacing;
 
         private Vector2 _minSize;
         private Vector2 _preferredSize;
-        private ChildData[] _childrenData = Array.Empty<ChildData>();
+        private ChildData[] _childrenData;
         private DrivenRectTransformTracker _tracker;
 
 
@@ -43,20 +42,15 @@ namespace AnimatedLayoutList
                 var data = new ChildData()
                 {
                     transform = rectTransform,
+                    position = rectTransform.anchoredPosition,
+                    size = rectTransform.sizeDelta,
                     ignorer = ignored,
                     animatedElement = animatedLayoutElement,
-                    isNew = !_childrenData.Any(cd => ReferenceEquals(rectTransform, cd.transform))
+                    isNew = _childrenData != null && !_childrenData.Any(cd => ReferenceEquals(rectTransform, cd.transform))
                 };
-                OnMapChildData(rectTransform,ref data);
                 return data;
             }
         }
-
-        protected virtual void OnMapChildData(RectTransform rectTransform, ref ChildData data)
-        {
-            
-        }
-        
 
         protected override void OnEnable()
         {
@@ -92,13 +86,15 @@ namespace AnimatedLayoutList
             yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
+#if UNITY_EDITOR
 
         protected override void OnValidate()
         {
             base.OnValidate();
             SetDirty();
         }
-
+#endif
+        
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
@@ -113,6 +109,7 @@ namespace AnimatedLayoutList
 
         public void CalculateLayoutInputHorizontal()
         {
+            /*
             _minSize.x = 0;
             _preferredSize.x = 0;
 
@@ -133,6 +130,7 @@ namespace AnimatedLayoutList
 
             _minSize.x += _padding.x + _padding.z;
             _preferredSize.x += _padding.x + _padding.z;
+            */
         }
 
         public void CalculateLayoutInputVertical()
@@ -197,7 +195,7 @@ namespace AnimatedLayoutList
 
         private void ApplyChildrenSizes()
         {
-            if (!UnityEngine.Application.isPlaying)
+            if (!Application.isPlaying)
                 ApplyChildrenSizesImmediate();
             else
                 ApplyChildrenSizesAnimated();
