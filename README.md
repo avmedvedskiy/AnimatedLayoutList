@@ -8,7 +8,7 @@ Animated settings with DOTween plugin, can be overrided with animations etc.
 
 ![image](https://user-images.githubusercontent.com/17832838/164189926-2030b92f-bd0e-479b-beff-428a05fac8d4.png)
 
-https://user-images.githubusercontent.com/17832838/164189452-216d9894-6600-4816-9084-c4568dda60df.mp4
+https://user-images.githubusercontent.com/17832838/164243929-d8fd6679-9194-4108-b15a-69907e50f1a0.mp4
 
 Also include auto scroll to target transfrom
 
