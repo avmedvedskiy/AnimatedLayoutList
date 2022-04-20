@@ -95,11 +95,13 @@ namespace AnimatedLayoutList
         }
 #endif
         
+        /*
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
             SetDirty();
         }
+        */
 
         protected override void OnDidApplyAnimationProperties()
         {
