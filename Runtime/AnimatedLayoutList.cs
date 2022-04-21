@@ -56,7 +56,7 @@ namespace AnimatedLayoutList
         {
             base.OnEnable();
             GatherChildren();
-            SetDirty();
+            //SetDirty();
         }
 
         protected override void OnDisable()
@@ -67,10 +67,11 @@ namespace AnimatedLayoutList
 
         private void OnTransformChildrenChanged()
         {
-            GatherChildren();
-            SetDirty();
+            GatherChildren(); 
+            //SetDirty();
         }
 
+        /*
         private void SetDirty()
         {
             if (!IsActive())
@@ -86,12 +87,14 @@ namespace AnimatedLayoutList
             yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
+        */
+        
 #if UNITY_EDITOR
 
         protected override void OnValidate()
         {
             base.OnValidate();
-            SetDirty();
+            //SetDirty();
         }
 #endif
         
@@ -103,11 +106,13 @@ namespace AnimatedLayoutList
         }
         */
 
+        /*
         protected override void OnDidApplyAnimationProperties()
         {
             base.OnDidApplyAnimationProperties();
             SetDirty();
         }
+        */
 
         public void CalculateLayoutInputHorizontal()
         {
