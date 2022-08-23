@@ -6,9 +6,16 @@ using UnityEngine.UI;
 
 namespace AnimatedLayoutList
 {
+    
     [RequireComponent(typeof(RectTransform)), ExecuteAlways]
     public class AnimatedLayoutList : UIBehaviour, ILayoutElement, ILayoutGroup
     {
+        public enum LayoutType
+        {
+            Vertical,
+            Horizontal
+        }
+        
         public float minWidth => _minSize.x;
         public float preferredWidth => _preferredSize.x;
         public float flexibleWidth => 0;
@@ -17,6 +24,7 @@ namespace AnimatedLayoutList
         public float flexibleHeight => 0;
         public int layoutPriority => 0;
         
+        [SerializeField] private LayoutType _layoutType;
         [SerializeField] private Vector4 _padding;
         [SerializeField] private float _spacing;
 
@@ -31,6 +39,7 @@ namespace AnimatedLayoutList
             //maybe need optimize
             _childrenData = transform
                 .OfType<RectTransform>()
+                .Where(x=> x.gameObject.activeSelf)
                 .Select(MapToChildData)
                 .ToArray();
             
@@ -68,10 +77,10 @@ namespace AnimatedLayoutList
         private void OnTransformChildrenChanged()
         {
             GatherChildren(); 
-            //SetDirty();
+            SetDirty();
         }
 
-        /*
+        
         private void SetDirty()
         {
             if (!IsActive())
@@ -87,36 +96,36 @@ namespace AnimatedLayoutList
             yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
-        */
+        
         
 #if UNITY_EDITOR
 
         protected override void OnValidate()
         {
             base.OnValidate();
-            //SetDirty();
+            SetDirty();
         }
 #endif
         
-        /*
+        
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
             SetDirty();
         }
-        */
 
-        /*
         protected override void OnDidApplyAnimationProperties()
         {
             base.OnDidApplyAnimationProperties();
             SetDirty();
         }
-        */
+        
 
         public void CalculateLayoutInputHorizontal()
         {
-            /*
+            if(_layoutType != LayoutType.Horizontal)
+                return;
+            
             _minSize.x = 0;
             _preferredSize.x = 0;
 
@@ -128,20 +137,20 @@ namespace AnimatedLayoutList
                 var childMinWidth = LayoutUtility.GetMinWidth(childData.transform);
                 var childPreferredWidth = LayoutUtility.GetPreferredWidth(childData.transform);
 
-                if (childMinWidth > _minSize.x)
-                    _minSize.x = childMinWidth;
-
-                if (childPreferredWidth > _preferredSize.x)
-                    _preferredSize.x = childPreferredWidth;
+                _minSize.x += childMinWidth + _spacing;
+                _preferredSize.x += childPreferredWidth + _spacing;
             }
 
             _minSize.x += _padding.x + _padding.z;
             _preferredSize.x += _padding.x + _padding.z;
-            */
+            
         }
 
         public void CalculateLayoutInputVertical()
         {
+            if(_layoutType != LayoutType.Vertical)
+                return;
+            
             _minSize.y = 0;
             _preferredSize.y = 0;
 
@@ -163,11 +172,47 @@ namespace AnimatedLayoutList
 
         public void SetLayoutHorizontal()
         {
+            if(_layoutType != LayoutType.Horizontal)
+                return;
             
+            _tracker.Clear();
+            var size = ((RectTransform)transform).rect.size;
+            var x = _padding.x;
+
+            
+            for (int i = 0; i < _childrenData.Length; i++)
+            {
+                ref var childData = ref _childrenData[i];
+                if (childData.IsIgnored)
+                    continue;
+
+                var childMinWidth = LayoutUtility.GetMinWidth(childData.transform);
+                var childPreferredWidth = LayoutUtility.GetPreferredWidth(childData.transform);
+
+                childData.size.y = size.y - _padding.y - _padding.z;
+                childData.size.x = childPreferredWidth > childMinWidth
+                    ? childPreferredWidth
+                    : childMinWidth;
+
+                childData.position.y = _padding.y;
+                childData.position.x = x;
+                x += childData.size.x + _spacing;
+
+                _tracker.Add(this, childData.transform,
+                    DrivenTransformProperties.Anchors
+                    | DrivenTransformProperties.Pivot
+                    | DrivenTransformProperties.AnchoredPosition
+                    | DrivenTransformProperties.SizeDelta);
+            }
+
+            ApplyChildrenSizes();
         }
 
         public void SetLayoutVertical()
         {
+            if(_layoutType != LayoutType.Vertical)
+                return;
+            
             _tracker.Clear();
             var size = ((RectTransform)transform).rect.size;
             var y = _padding.y;
@@ -217,9 +262,9 @@ namespace AnimatedLayoutList
                 if (childData.IsIgnored)
                     continue;
 
-                childData.transform.anchorMin = Vector2.up;
-                childData.transform.anchorMax = Vector2.up;
-                childData.transform.pivot = Vector2.up;
+                //childData.transform.anchorMin = Vector2.up;
+                //childData.transform.anchorMax = Vector2.up;
+                //childData.transform.pivot = Vector2.up;
 
                 childData.transform.sizeDelta = childData.size;
                 childData.transform.anchoredPosition = childData.position;
@@ -235,9 +280,9 @@ namespace AnimatedLayoutList
                     continue;
 
                 var childTransform = childData.transform;
-                childTransform.anchorMin = Vector2.up;
-                childTransform.anchorMax = Vector2.up;
-                childTransform.pivot = Vector2.up;
+                //childTransform.anchorMin = Vector2.up;
+                //childTransform.anchorMax = Vector2.up;
+                //childTransform.pivot = Vector2.up;
 
                 childTransform.sizeDelta = childData.size;
 

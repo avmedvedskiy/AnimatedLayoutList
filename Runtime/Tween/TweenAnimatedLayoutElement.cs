@@ -2,6 +2,7 @@
 using System;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace AnimatedLayoutList
 {
@@ -10,11 +11,13 @@ namespace AnimatedLayoutList
         [SerializeField] private Ease _ease;
         [SerializeField] private float _animatedSpeed;
 
+        [SerializeField] private float _newElementDelay;
         [SerializeField] private Ease _newElementEase;
         [SerializeField] private float _newElementAnimatedSpeed;
         [SerializeField] private Vector2 _newElementOffset;
 
 
+        [SerializeField] private float _removeDelay;
         [SerializeField] private Ease _removeElementEase;
         [SerializeField] private float _removelementAnimatedSpeed;
         [SerializeField] private Vector2 _removeElementOffset;
@@ -31,6 +34,7 @@ namespace AnimatedLayoutList
             child.transform.DOKill();
             child.transform.anchoredPosition = child.position + _newElementOffset;
             child.transform.DOAnchorPos(child.position, _newElementAnimatedSpeed)
+                .SetDelay(_newElementDelay)
                 .SetEase(_newElementEase);
         }
 
@@ -40,6 +44,7 @@ namespace AnimatedLayoutList
             var t = (RectTransform)transform;
             t.DOKill();
             t.DOAnchorPos(t.anchoredPosition + _removeElementOffset, _removelementAnimatedSpeed)
+                .SetDelay(_removeDelay)
                 .SetEase(_removeElementEase)
                 .OnComplete(() => Destroy(gameObject));
         }
