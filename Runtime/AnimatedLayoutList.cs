@@ -6,16 +6,15 @@ using UnityEngine.UI;
 
 namespace AnimatedLayoutList
 {
-    
     [RequireComponent(typeof(RectTransform)), ExecuteAlways]
     public class AnimatedLayoutList : UIBehaviour, ILayoutElement, ILayoutGroup
     {
-        public enum LayoutType
+        private enum LayoutType
         {
             Vertical,
             Horizontal
         }
-        
+
         public float minWidth => _minSize.x;
         public float preferredWidth => _preferredSize.x;
         public float flexibleWidth => 0;
@@ -23,10 +22,11 @@ namespace AnimatedLayoutList
         public float preferredHeight => _preferredSize.y;
         public float flexibleHeight => 0;
         public int layoutPriority => 0;
-        
+
         [SerializeField] private LayoutType _layoutType;
         [SerializeField] private Vector4 _padding;
         [SerializeField] private float _spacing;
+        [SerializeField] private bool _immediate;
 
         private Vector2 _minSize;
         private Vector2 _preferredSize;
@@ -39,15 +39,15 @@ namespace AnimatedLayoutList
             //maybe need optimize
             _childrenData = transform
                 .OfType<RectTransform>()
-                .Where(x=> x.gameObject.activeSelf)
+                .Where(x => x.gameObject.activeSelf)
                 .Select(MapToChildData)
                 .ToArray();
-            
+
             ChildData MapToChildData(RectTransform rectTransform)
             {
                 rectTransform.TryGetComponent<ILayoutIgnorer>(out var ignored);
                 rectTransform.TryGetComponent<IAnimatedLayoutElement>(out var animatedLayoutElement);
-            
+
                 var data = new ChildData()
                 {
                     transform = rectTransform,
@@ -55,7 +55,8 @@ namespace AnimatedLayoutList
                     size = rectTransform.sizeDelta,
                     ignorer = ignored,
                     animatedElement = animatedLayoutElement,
-                    isNew = _childrenData != null && !_childrenData.Any(cd => ReferenceEquals(rectTransform, cd.transform))
+                    isNew = _childrenData != null &&
+                            !_childrenData.Any(cd => ReferenceEquals(rectTransform, cd.transform))
                 };
                 return data;
             }
@@ -76,11 +77,11 @@ namespace AnimatedLayoutList
 
         private void OnTransformChildrenChanged()
         {
-            GatherChildren(); 
+            GatherChildren();
             SetDirty();
         }
 
-        
+
         private void SetDirty()
         {
             if (!IsActive())
@@ -96,8 +97,8 @@ namespace AnimatedLayoutList
             yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
-        
-        
+
+
 #if UNITY_EDITOR
 
         protected override void OnValidate()
@@ -106,26 +107,26 @@ namespace AnimatedLayoutList
             SetDirty();
         }
 #endif
-        
-        
+
+
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
             SetDirty();
         }
-
+/*
         protected override void OnDidApplyAnimationProperties()
         {
             base.OnDidApplyAnimationProperties();
             SetDirty();
         }
-        
+*/
 
         public void CalculateLayoutInputHorizontal()
         {
-            if(_layoutType != LayoutType.Horizontal)
+            if (_layoutType != LayoutType.Horizontal)
                 return;
-            
+
             _minSize.x = 0;
             _preferredSize.x = 0;
 
@@ -143,14 +144,13 @@ namespace AnimatedLayoutList
 
             _minSize.x += _padding.x + _padding.z;
             _preferredSize.x += _padding.x + _padding.z;
-            
         }
 
         public void CalculateLayoutInputVertical()
         {
-            if(_layoutType != LayoutType.Vertical)
+            if (_layoutType != LayoutType.Vertical)
                 return;
-            
+
             _minSize.y = 0;
             _preferredSize.y = 0;
 
@@ -172,14 +172,14 @@ namespace AnimatedLayoutList
 
         public void SetLayoutHorizontal()
         {
-            if(_layoutType != LayoutType.Horizontal)
+            if (_layoutType != LayoutType.Horizontal)
                 return;
-            
+
             _tracker.Clear();
             var size = ((RectTransform)transform).rect.size;
             var x = _padding.x;
 
-            
+
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
@@ -210,9 +210,9 @@ namespace AnimatedLayoutList
 
         public void SetLayoutVertical()
         {
-            if(_layoutType != LayoutType.Vertical)
+            if (_layoutType != LayoutType.Vertical)
                 return;
-            
+
             _tracker.Clear();
             var size = ((RectTransform)transform).rect.size;
             var y = _padding.y;
@@ -247,11 +247,10 @@ namespace AnimatedLayoutList
 
         private void ApplyChildrenSizes()
         {
-            if (!Application.isPlaying)
+            if (!Application.isPlaying || _immediate)
                 ApplyChildrenSizesImmediate();
             else
                 ApplyChildrenSizesAnimated();
-
         }
 
         private void ApplyChildrenSizesImmediate()
@@ -297,7 +296,6 @@ namespace AnimatedLayoutList
                     {
                         AnimatedChildChangePosition(ref childData);
                     }
-
                 }
             }
         }
