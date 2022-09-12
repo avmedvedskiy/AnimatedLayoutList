@@ -39,6 +39,9 @@ namespace AnimatedLayoutList
 
         private void GatherChildren()
         {
+            if(!isActiveAndEnabled)
+                return;
+            
             //maybe need optimize
             _childrenData = transform
                 .OfType<RectTransform>()

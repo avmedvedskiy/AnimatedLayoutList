@@ -22,8 +22,13 @@ namespace AnimatedLayoutList
         [SerializeField] private float _removelementAnimatedSpeed;
         [SerializeField] private Vector2 _removeElementOffset;
 
+        private bool _markToDelete = false;
+
         public void AnimateChangePositionElement(ref ChildData child)
         {
+            if (_markToDelete)
+                return;
+
             child.transform.DOKill();
             child.transform.DOAnchorPos(child.position, _animatedSpeed)
                 .SetEase(_ease);
@@ -31,6 +36,8 @@ namespace AnimatedLayoutList
 
         public void AnimateNewElement(ref ChildData child)
         {
+            if (_markToDelete)
+                return;
             child.transform.DOKill();
             child.transform.anchoredPosition = child.position + _newElementOffset;
             child.transform.DOAnchorPos(child.position, _newElementAnimatedSpeed)
@@ -41,6 +48,7 @@ namespace AnimatedLayoutList
         [ContextMenu(nameof(RemoveElement))]
         public void RemoveElement()
         {
+            _markToDelete = true;
             var t = (RectTransform)transform;
             t.DOKill();
             t.DOAnchorPos(t.anchoredPosition + _removeElementOffset, _removelementAnimatedSpeed)
