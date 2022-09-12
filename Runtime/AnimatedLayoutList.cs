@@ -26,7 +26,6 @@ namespace AnimatedLayoutList
         [SerializeField] private LayoutType _layoutType;
         [SerializeField] private RectOffset _padding = new RectOffset();
         [SerializeField] private float _spacing;
-        [SerializeField] private bool _immediate;
 
         [SerializeField] private TextAnchor _childAlignment = TextAnchor.MiddleCenter;
 
@@ -225,7 +224,7 @@ namespace AnimatedLayoutList
 
         private void ApplyChildrenSizes()
         {
-            if (!Application.isPlaying || _immediate)
+            if (!Application.isPlaying)
                 ApplyChildrenSizesImmediate();
             else
                 ApplyChildrenSizesAnimated();
