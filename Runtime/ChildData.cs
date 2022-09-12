@@ -12,7 +12,9 @@ namespace AnimatedLayoutList
         public IAnimatedLayoutElement animatedElement;
         public Vector2 position;
         public Vector2 size;
+        public Vector2 pivot;
         public bool isNew;
+        public bool immediately;
 
         public bool IsIgnored => ignorer?.ignoreLayout ?? false;
     }
