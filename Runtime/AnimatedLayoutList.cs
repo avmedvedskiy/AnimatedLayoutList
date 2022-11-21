@@ -103,7 +103,7 @@ namespace AnimatedLayoutList
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
-                if (childData.IsIgnored)
+                if (childData.IsIgnored || childData.transform == null)
                     continue;
                 var childMinWidth = LayoutUtility.GetMinWidth(childData.transform);
                 var childPreferredWidth = LayoutUtility.GetPreferredWidth(childData.transform);
@@ -124,7 +124,7 @@ namespace AnimatedLayoutList
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
-                if (childData.IsIgnored)
+                if (childData.IsIgnored || childData.transform == null)
                     continue;
                 var childMinHeight = LayoutUtility.GetMinHeight(childData.transform);
                 var childPreferredHeight = LayoutUtility.GetPreferredHeight(childData.transform);
@@ -154,7 +154,7 @@ namespace AnimatedLayoutList
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
-                if (childData.IsIgnored)
+                if (childData.IsIgnored || childData.transform == null)
                     continue;
 
                 var childMinHeight = LayoutUtility.GetMinHeight(childData.transform);
@@ -198,7 +198,7 @@ namespace AnimatedLayoutList
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
-                if (childData.IsIgnored)
+                if (childData.IsIgnored || childData.transform == null)
                     continue;
 
                 var childMinWidth = LayoutUtility.GetMinWidth(childData.transform);
@@ -238,7 +238,7 @@ namespace AnimatedLayoutList
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
-                if (childData.IsIgnored)
+                if (childData.IsIgnored || childData.transform == null)
                     continue;
 
                 var childDataTransform = childData.transform;
@@ -256,7 +256,7 @@ namespace AnimatedLayoutList
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
-                if (childData.IsIgnored)
+                if (childData.IsIgnored || childData.transform == null)
                     continue;
 
                 var childDataTransform = childData.transform;
@@ -308,7 +308,7 @@ namespace AnimatedLayoutList
         protected override void OnEnable()
         {
             base.OnEnable();
-            GatherChildren();
+            //GatherChildren();
             SetDirty();
         }
 
@@ -321,7 +321,7 @@ namespace AnimatedLayoutList
 
         private void OnTransformChildrenChanged()
         {
-            GatherChildren();
+            //GatherChildren();
             SetDirty();
         }
 
@@ -342,16 +342,28 @@ namespace AnimatedLayoutList
         {
             if (!IsActive())
                 return;
+            if(!_inProcess)
+                StartCoroutine(DelayedMarkLayoutForRebuild((RectTransform)transform));
+            /*
             if (!CanvasUpdateRegistry.IsRebuildingLayout())
-                LayoutRebuilder.MarkLayoutForRebuild((RectTransform)transform);
+                MarkLayoutForRebuild((RectTransform)transform);
             else
-                StartCoroutine(DelayedSetDirty((RectTransform)transform));
+                StartCoroutine(DelayedMarkLayoutForRebuild((RectTransform)transform));
+                */
         }
 
-        IEnumerator DelayedSetDirty(RectTransform rectTransform)
+        private bool _inProcess;
+        private void MarkLayoutForRebuild(RectTransform rectTransform)
         {
-            yield return null;
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+        }
+        IEnumerator DelayedMarkLayoutForRebuild(RectTransform rectTransform)
+        {
+            _inProcess = true;
+            yield return null;
+            GatherChildren();
+            LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+            _inProcess = false;
         }
 
 
