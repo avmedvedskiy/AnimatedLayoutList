@@ -8,8 +8,15 @@ namespace AnimatedLayoutList
     {
         [SerializeField] private RectTransform _target;
         [SerializeField] private ScrollRect _scrollRect;
+        [SerializeField] private float _startOffset;
 
         private Vector2 _lastTargetPosition;
+
+        public RectTransform Target
+        {
+            get => _target;
+            set => _target = value;
+        }
 
         private void OnEnable()
         {
@@ -37,9 +44,9 @@ namespace AnimatedLayoutList
 
         private float GetNextScrollValue()
         {
-            float contentHeight = _scrollRect.content.sizeDelta.y;
+            float contentHeight = _scrollRect.content.sizeDelta.y - _startOffset;
             float targetHeight = _target.sizeDelta.y;
-            float targetPosition = Mathf.Abs(_target.anchoredPosition.y) + targetHeight / 2f;
+            float targetPosition = Mathf.Abs(_target.anchoredPosition.y);
             float position = 1f - targetPosition / contentHeight;
 
             float offset = targetHeight / contentHeight;
