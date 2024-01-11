@@ -23,6 +23,11 @@ namespace AnimatedLayoutList
             if(_target != null)
                 _lastTargetPosition = _target.anchoredPosition;
         }
+        
+        public void FocusOnItem(int index)
+        {
+            Target = (RectTransform)_scrollRect.content.GetChild(index).transform;
+        }
 
         private void Update()
         {
