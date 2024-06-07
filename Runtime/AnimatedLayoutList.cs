@@ -26,7 +26,7 @@ namespace AnimatedLayoutList
         [SerializeField] private LayoutType _layoutType;
         [SerializeField] private RectOffset _padding = new RectOffset();
         [SerializeField] private float _spacing;
-
+        [SerializeField] private bool _useContentSize = true;
         [SerializeField] private TextAnchor _childAlignment = TextAnchor.MiddleCenter;
 
         private Vector2 _minSize;
@@ -150,7 +150,8 @@ namespace AnimatedLayoutList
 
             float y = GetStartOffset(1, requiredSize);
             float x = GetStartOffset(0);
-
+            var sizeX = transform.GetComponent<RectTransform>().rect.width;
+            
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
@@ -161,6 +162,7 @@ namespace AnimatedLayoutList
                 var childPreferredHeight = LayoutUtility.GetPreferredHeight(childData.transform);
 
                 //childData.size.x = size.x - _padding.left - _padding.right;
+                if (_useContentSize) childData.size.x = sizeX;
                 childData.size.y = childPreferredHeight > childMinHeight
                     ? childPreferredHeight
                     : childMinHeight;
@@ -194,7 +196,8 @@ namespace AnimatedLayoutList
 
             float x = GetStartOffset(0, requiredSize);
             float y = -GetStartOffset(1);
-
+            var sizeX = transform.GetComponent<RectTransform>().rect.width;
+            
             for (int i = 0; i < _childrenData.Length; i++)
             {
                 ref var childData = ref _childrenData[i];
@@ -204,7 +207,7 @@ namespace AnimatedLayoutList
                 var childMinWidth = LayoutUtility.GetMinWidth(childData.transform);
                 var childPreferredWidth = LayoutUtility.GetPreferredWidth(childData.transform);
 
-                childData.size.x = childPreferredWidth > childMinWidth
+                childData.size.x = _useContentSize? sizeX : childPreferredWidth > childMinWidth
                     ? childPreferredWidth
                     : childMinWidth;
 
